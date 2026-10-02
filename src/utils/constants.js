@@ -108,7 +108,8 @@ export const DEFAULTS = {
 export const CURRENCIES = [
   { code: 'GBP', symbol: '£', name: 'British Pound' },
   { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' }
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' }
 ];
 
 // Local storage keys
