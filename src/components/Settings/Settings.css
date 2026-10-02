@@ -147,3 +147,19 @@
     flex-direction: column;
   }
 }
+
+
+/* Extra breathing room at the bottom of the settings modal */
+.settings-modal .settings-content {
+  padding-bottom: var(--space-6, 1.5rem);
+}
+
+/* Four currencies fit best as a 2x2 grid */
+.settings-modal .currency-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Unselected currency cards inherit the page text color instead of the browser's black */
+.settings-modal .currency-card {
+  color: inherit;
+}
