@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { CATEGORIES, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
-import { addExpense, updateExpense } from '../../utils/localStorage';
+import { createExpense, updateExpense } from '../../utils/api';
 import { loadCurrency } from '../../utils/localStorage';
 import './ExpenseForm.css';
 
@@ -64,10 +64,11 @@ function ExpenseForm({ isOpen, onClose, onSuccess, editingExpense = null }) {
         date: formData.date
       };
 
+       // Save to the server and wait for it to finish before closing the form
       if (editingExpense) {
-        updateExpense(editingExpense.id, expenseData);
+        await updateExpense(editingExpense.id, expenseData);
       } else {
-        addExpense(expenseData);
+        await createExpense(expenseData);
       }
 
       // Reset form
