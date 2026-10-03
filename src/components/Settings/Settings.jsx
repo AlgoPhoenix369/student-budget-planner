@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Upload, DollarSign, X } from 'lucide-react';
 import { CURRENCIES } from '../../utils/constants';
-import { loadCurrency, saveCurrency, exportData, importData } from '../../utils/localStorage';
+import { loadCurrency, saveCurrency } from '../../utils/localStorage';
+import { exportBackup, importBackup } from '../../utils/api';
 import './Settings.css';
 
 function Settings({ isOpen, onClose, onDataImported }) {
@@ -15,17 +16,23 @@ function Settings({ isOpen, onClose, onDataImported }) {
     window.location.reload(); // Refresh to apply currency
   };
 
-  const handleExport = () => {
-    const data = exportData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `budget-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // Download visitor's expenses and budget from the server as a JSON backup file
+  const handleExport = async () => {
+    try {
+      const data = await exportBackup();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `budget-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      setImportError('Could not export your data. Please try again.');
+    }
   };
 
   const handleImport = (event) => {
@@ -33,20 +40,17 @@ function Settings({ isOpen, onClose, onDataImported }) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+        // Reads the chosen file, sends it to the server, then reloads to show the restored data
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target.result);
-        const success = importData(data);
-        
-        if (success) {
-          setImportError('');
-          onDataImported();
-          window.location.reload();
-        } else {
-          setImportError('Failed to import data. Please check the file.');
-        }
+        await importBackup(data);
+        setImportError('');
+        onDataImported();
+        window.location.reload();
       } catch (error) {
-        setImportError('Invalid file format. Please upload a valid backup file.');
+        console.error('Error importing data:', error);
+        setImportError('Could not import this file. Please upload a valid backup file.');
       }
     };
     reader.readAsText(file);

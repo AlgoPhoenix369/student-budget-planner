@@ -316,3 +316,14 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+
+/* Server error banner: message on the left, Retry button on the right */
+.dashboard .error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 1rem);
+  margin-bottom: var(--space-4, 1rem);
+}
