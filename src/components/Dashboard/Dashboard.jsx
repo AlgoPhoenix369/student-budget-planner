@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { 
-  loadExpenses, 
-  loadBudget,
-  saveBudget,
-  getExpensesByMonth,
-  deleteExpense,
-  loadCurrency
-} from '../../utils/localStorage';
+import { loadCurrency } from '../../utils/localStorage';
+import {
+  fetchBudget,
+  updateBudget,
+  fetchExpensesByMonth,
+  deleteExpense
+} from '../../utils/api';
 import { 
   getSpendingInsights,
   getDaysElapsedInMonth,
@@ -34,6 +33,8 @@ function Dashboard({ theme, toggleTheme, isDark }) {
   const [notification, setNotification] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   // Load data on mount
   useEffect(() => {
@@ -47,18 +48,26 @@ function Dashboard({ theme, toggleTheme, isDark }) {
     return () => window.removeEventListener('openBudgetModal', handleOpenBudget);
   }, []);
 
-  const loadData = () => {
-    const budget = loadBudget();
-    setMonthlyBudget(budget);
+  // Fetches the budget and this month's expenses from the API, then recalculates insights
+  const loadData = async () => {
+    setLoadError('');
+    try {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const [budget, monthExpenses] = await Promise.all([
+        fetchBudget(),
+        fetchExpensesByMonth(year, month)
+      ]);
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const monthExpenses = getExpensesByMonth(year, month);
-    setExpenses(monthExpenses);
-
-    // Calculate insights
-    const spendingInsights = getSpendingInsights(budget, monthExpenses);
-    setInsights(spendingInsights);
+      setMonthlyBudget(budget);
+      setExpenses(monthExpenses);
+      setInsights(getSpendingInsights(budget, monthExpenses));
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setLoadError('Could not reach the server. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddExpense = () => {
@@ -71,11 +80,17 @@ function Dashboard({ theme, toggleTheme, isDark }) {
     setIsFormOpen(true);
   };
 
-  const handleDeleteExpense = (expense) => {
+  // Deletes an expense on the server after confirmation, then refreshes the list
+  const handleDeleteExpense = async (expense) => {
     if (window.confirm(`Delete "${expense.description}"?`)) {
-      deleteExpense(expense.id);
-      showNotification(SUCCESS_MESSAGES.EXPENSE_DELETED);
-      loadData();
+      try {
+        await deleteExpense(expense.id);
+        showNotification(SUCCESS_MESSAGES.EXPENSE_DELETED);
+        await loadData();
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+        showNotification('Could not delete the expense. Please try again.');
+      }
     }
   };
 
@@ -84,12 +99,17 @@ function Dashboard({ theme, toggleTheme, isDark }) {
     loadData();
   };
 
-  const handleBudgetUpdate = (newBudget) => {
-    saveBudget(newBudget);
-    setMonthlyBudget(newBudget);
-    setIsBudgetModalOpen(false);
-    showNotification('Budget updated successfully! 💰');
-    loadData();
+  // Saves the new monthly budget to the server and refreshes the dashboard
+  const handleBudgetUpdate = async (newBudget) => {
+    try {
+      await updateBudget(newBudget);
+      setIsBudgetModalOpen(false);
+      showNotification('Budget updated successfully! 💰');
+      await loadData();
+    } catch (error) {
+      console.error('Error updating budget:', error);
+      showNotification('Could not save the budget. Please try again.');
+    }
   };
 
   const showNotification = (message) => {
@@ -160,6 +180,19 @@ function Dashboard({ theme, toggleTheme, isDark }) {
             Settings & Backup
           </button>
         </motion.div>
+
+        {/* Loading and error states for API requests */}
+        {isLoading && !insights && (
+          <p style={{ textAlign: 'center' }}>Loading your budget...</p>
+        )}
+        {loadError && (
+          <div className="error-banner">
+            {loadError}{' '}
+            <button onClick={loadData} className="btn btn-secondary btn-sm">
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Budget Summary */}
         {insights && (
