@@ -18,25 +18,25 @@ A full-stack budget tracking application designed for students. Track expenses, 
 
 ![App Banner](./src/assets/banner.png)
 
-##  Table of Contents
+## Table of Contents
 
-- [Features](#-features)
-- [Live Demo](#-live-demo)
-- [Screenshots](#️-screenshots)
-- [Tech Stack](#️-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [API Reference](#-api-reference)
-- [Project Structure](#-project-structure)
-- [Usage Guide](#-usage-guide)
-- [Deployment](#-deployment)
-- [Design Philosophy](#-design-philosophy)
-- [Privacy & Data](#-privacy--data)
-- [Troubleshooting](#-troubleshooting)
-- [Git Workflow](#-git-workflow)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
+- [Features](#features)
+- [Live Demo](#live-demo)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [Project Structure](#project-structure)
+- [Usage Guide](#usage-guide)
+- [Deployment](#deployment)
+- [Design Philosophy](#design-philosophy)
+- [Privacy & Data](#privacy--data)
+- [Troubleshooting](#troubleshooting)
+- [Git Workflow](#git-workflow)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
@@ -226,7 +226,7 @@ The production-ready frontend files will be in the `dist` folder.
 
 ---
 
-## 🔧 Environment Variables
+##  Environment Variables
 
 ### Frontend (project root, optional for local development)
 Copy `.env.example` to `.env` to change the backend address.
@@ -249,7 +249,7 @@ Never commit a real `.env` file. It is already listed in `.gitignore`.
 
 ---
 
-## 📡 API Reference
+##  API Reference
 
 All `/api/expenses`, `/api/budget` and `/api/backup` requests require an `X-Client-Id` header (16 to 64 letters, numbers, `_` or `-`). The frontend sends it automatically.
 
@@ -281,7 +281,7 @@ The full interactive documentation is available at `/docs` on the running backen
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 ```
 student-budget-planner/
 ├── backend/
